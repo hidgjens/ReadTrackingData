@@ -5,6 +5,8 @@
 
     E: lewis.higgins@postgrad.manchester.ac.uk
 
+    W: https://github.com/hidgjens/ReadTrackingData
+
     Example for loading and analysing a GamePack.
 
     tqdm is an optional module used in Football.py which provides progress bars while loading data. (install via python pip)

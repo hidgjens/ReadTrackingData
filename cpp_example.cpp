@@ -5,6 +5,8 @@
 
     E: lewis.higgins@postgrad.manchester.ac.uk
 
+    W: https://github.com/hidgjens/ReadTrackingData
+
     Example for loading and analysing a GamePack.
 
     To build, please add "FOOTBALL/THIRDPARTY" to your include-dirs via the -I flag:
