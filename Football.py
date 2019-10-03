@@ -146,14 +146,14 @@ class Player:
         }
 
     @staticmethod
-    def get_player_from_msgpk_segment(msgpk_segment):
+    def get_player_from_msgpk_segment(msgpk_segment, team_char = 'U'):
         return Player(
-            team            = chr(msgpk_segment[0]),
-            player_id       = msgpk_segment[1],
-            shirt_num       = msgpk_segment[2],
-            x_pos           = msgpk_segment[3],
-            y_pos           = msgpk_segment[4],
-            ball_owned      = msgpk_segment[5]
+            team            = team_char,
+            player_id       = msgpk_segment[0],
+            shirt_num       = msgpk_segment[1],
+            x_pos           = msgpk_segment[2],
+            y_pos           = msgpk_segment[3],
+            ball_owned      = msgpk_segment[4]
         )
 
 class TeamIterator:
@@ -170,6 +170,7 @@ class TeamIterator:
             raise StopIteration
 
 class Team:
+    team_char           :   str                     =   "U"
     frame_id            :   int                     =   0
     ball_owned          :   bool                    =   False
     players_in_team     :   typing.List[Player]     =   []
@@ -182,6 +183,7 @@ class Team:
         self.check_kwargs("frame_id", kwargs)
         self.check_kwargs("ball_owned", kwargs)
         self.check_kwargs("players_in_team", kwargs)
+        self.check_kwargs("team_char", kwargs)
 
     def __str__ (self):
         return "Frame {0}, Players: {1}".format(self.frame_id, [p.__str__() for p in self.players_in_team])
@@ -195,6 +197,7 @@ class Team:
     def get_json_list(self):
         return [
             self.frame_id,
+            self.team_char,
             self.ball_owned,
             [p.get_json_list() for p in self.players_in_team]
         ]
@@ -202,6 +205,7 @@ class Team:
     def get_json_dict(self):
         return {
             'FRAMEID'   :   self.frame_id,
+            'TEAM'      :   self.team_char,
             'BALL'      :   self.ball_owned,
             'PLAYERS'   :   [p.get_json_dict() for p in self.players_in_team]
         }
@@ -217,8 +221,9 @@ class Team:
             team_frames.append(
                 Team(
                     frame_id            = team_line[0],
-                    ball_owned          = team_line[1],
-                    players_in_team     = [Player.get_player_from_msgpk_segment(p) for p in team_line[2]]
+                    team_char           = team_line[1]
+                    ball_owned          = team_line[2],
+                    players_in_team     = [Player.get_player_from_msgpk_segment(p) for p in team_line[3]]
                 )
             )
 

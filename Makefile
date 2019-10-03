@@ -1,4 +1,4 @@
-CFLAGS=-m64 -O2 -I"./THIRDPARTY"
+CFLAGS=-m64 -O2 -I"./include"
 
 all:	cpp_example
 

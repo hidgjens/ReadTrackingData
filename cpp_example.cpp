@@ -22,9 +22,9 @@
 int main (int argc, char * argv[])
 {
     // variables to locate game
-    std::string     DATA_DIR    = "Data/";
-    uint            MATCH_ID    = 1059714;
-    bool            mode_5fps   = true;         // true for loading the 5fps version
+    std::string     DATA_DIR    = "./";
+    uint            MATCH_ID    = 919268;
+    bool            mode_5fps   = false;         // true for loading the 5fps version
 
     // Note that everything from the FOOTBALL folder is stored in namespace Football
     // Create match object
@@ -34,9 +34,11 @@ int main (int argc, char * argv[])
     ex_match.loadFromFile(DATA_DIR, MATCH_ID, mode_5fps);
 
     // count the number of frames in possession
-    uint        home_possession;
-    uint        away_possession;
-    uint        total_frames;       // only counting alive frames
+    uint        home_possession = 0;
+    uint        away_possession = 0;
+    uint        total_frames    = 0;       // only counting alive frames
+
+    uint        dead_frames     = 0;
 
     {    
 
@@ -49,6 +51,8 @@ int main (int argc, char * argv[])
         // store current frame in temporary storage
         _frame = ex_match.get_frame(i);
 
+        // std::cout << "frame get " << _frame.FRAME_ID << " (" << i << ")" << std::endl;
+
         /* 
             Analysis for this frame.
         */
@@ -56,6 +60,8 @@ int main (int argc, char * argv[])
         // check if ball is alive in this frame
         if (_frame.isAlive())
         {
+            // std::cout << "frame get " << _frame.FRAME_ID << " (" << i << ")" << std::endl;
+
             // increment alive frames counter
             total_frames ++;
 
@@ -93,6 +99,12 @@ int main (int argc, char * argv[])
                 break;
             } /* end of switch */
         } /* endif ball alive */
+        else
+        {
+            dead_frames ++;
+            // dead frame
+            // std::cout << "DEAD" << std::endl;
+        }
     } /* for loop ends */
 
     } // the extra set of curly braces is limiting the scope of _frame, beyond here it is no longer in scope. Good practice as _frame was temporary storage for the loop and no longer needed
@@ -104,13 +116,13 @@ int main (int argc, char * argv[])
     // print result to console
     printf ("\nHome team possession %4.1f%%, Away team possession %4.1f%%\n", home_pos_frac * 100.0, away_pos_frac * 100.0);
     
-
+    std::cout << "Alive frames: " << total_frames << " Dead frames: " << dead_frames << std::endl;
     // print starting player line-up
 
     printf ("\nInitial team line-ups:\n");
 
     // get the first frame
-    auto first_frame = ex_match.get_frame(0);
+    auto first_frame = ex_match.get_frame(120255);
 
     // get the Football::Team objects stored in the frame
     auto& initial_home_team = first_frame.HOMETEAM;

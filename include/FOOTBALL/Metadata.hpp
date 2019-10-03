@@ -2,9 +2,14 @@
 #define trackingdatalib_football_metadata_hpp
 
 #include <cstdlib>
+#include <cstdint>
+// #include <float.h>
 #include <string>
+#include <fstream>
 #include <vector>
 #include <utility>
+
+#include "nlohmann/json.hpp"
 
 
 namespace Football
@@ -86,10 +91,10 @@ class Metadata
     friend inline bool operator== (const Metadata & lhs, const Metadata & rhs);
 
     protected:
-    std::uint32_t       MATCHID;
-    std::string         DATE;
-    std::float_t        FPS;
-    std::float_t        PITCH_DIMS[2];
+    std::uint32_t                   MATCHID;
+    std::string                     DATE;
+    std::float_t                    FPS;
+    std::array<std::float_t, 2>     PITCH_DIMS; // say yes to STL
     //float               TRACKING_DIMS[2];
     std::vector<Period> PERIODS; 
 
@@ -102,8 +107,175 @@ class Metadata
 
     Metadata() : OPTA_F7(false) , OPTA_F24(false) {}   
 
-    ///     Translate the frameIds in all period objects by an amount. Used if frameIds are adjusted in the match to ensure that the frameId references in the period objects are correct. E.G if frameIds are translated to make the first frameId = 0.
-    ///     All values for start/end frame are subtracted by parameter d_frame.
+    ///     @brief Load a metadata file from a given path and returns an object representing that data.
+    ///     @param storage_metadata - Football::Metadata object to store the data in
+    ///     @param filepath     -   exact path (i.e with extentions etc.) to metadata file.
+    ///     @returns Football::Metadata -   Object which contains all the data stored in the metadata file. 
+    ///     @throws std::runtime_error if std::ifstream fails.
+    static Metadata & load_metadata_from_file(Metadata & storage_metadata, const std::string & filepath, const bool verbose = false)
+    {
+        std::cout << filepath << std::endl;
+        // open metadata file
+        std::ifstream   md_file{filepath};
+
+        // check if opening the file went ok. Possible bad filepath was given.
+        if (md_file.fail())
+        {
+            // failed, throw error
+            throw std::runtime_error("Failed to open file. Does file exist?");
+        }            
+        
+        // create storage json and ingest file
+        nlohmann::json      storage_json;
+        md_file         >>  storage_json;
+
+        // check carefully for data, store in metadata
+
+        if (storage_json.find("MATCHID") != storage_json.end())
+        {
+            // exists
+            storage_metadata.MATCHID    = storage_json.at("MATCHID").get_to(storage_metadata.MATCHID );
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Warning] No MatchID in Metadata." << std::endl;
+
+            throw std::runtime_error("No MatchID in Metadata");
+        }
+
+        if (storage_json.find("DATE") != storage_json.end())
+        {
+            storage_metadata.DATE       = storage_json.at("DATE").get<std::string>();
+        }
+        else
+        {
+            // tbh, not a problem
+            ;
+        }
+
+        if (storage_json.find("FPS") != storage_json.end())
+        {
+            storage_metadata.FPS        = storage_json.at("FPS").get<std::float_t>();
+        }
+        else
+        {
+            // kinda need this
+            if (verbose)
+                std::cerr << "[Warning] No FPS in Metadata." << std::endl;
+
+            throw std::runtime_error("No FPS in Metadata");
+            
+        }
+
+        if (storage_json.find("OPTA_F24") != storage_json.end())
+        {
+            storage_metadata.OPTA_F24   = storage_json.at("OPTA_F24").get<bool>();
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Warning] No OPTA_F24 in Metadata." << std::endl;                
+        
+            throw std::runtime_error("No OPTA_F24 in Metadata");
+        }
+
+        if (storage_json.find("OPTA_F7") != storage_json.end())
+        {
+            storage_metadata.OPTA_F7    = storage_json.at("OPTA_F7").get<bool>();
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Warning] No OPTA_F7 in Metadata." << std::endl;                
+            throw std::runtime_error("No OPTA_F7 in Metadata");
+
+        }
+
+        if (storage_json.find("PITCH_DIMS") != storage_json.end())
+        {
+            storage_json.at("PITCH_DIMS").get_to(storage_metadata.PITCH_DIMS);
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Warning] No PITCH_DIMS in Metadata." << std::endl;
+        
+            throw std::runtime_error("No PITCH_DIMS in Metadata");
+        }
+
+        if (storage_json.find("TRACKING_PROVIDER") != storage_json.end())
+        {
+            storage_json.at("TRACKING_PROVIDER").get_to(storage_metadata.TRACKING_PROVIDER);
+        }
+        else
+        {
+            // dont mind
+            ;
+        }
+
+        if (storage_json.find("PERIODS") != storage_json.end())
+        {
+            bool    all_periods_ok  = true;     // error flag
+            // temp variables
+            std::uint8_t    id;
+            std::uint32_t   start, end;
+            // loop through periods
+            for (auto & p : storage_json.at("PERIODS"))
+            {
+                if (p.find("id") != p.end())
+                {
+                    p.at("id").get_to(id);
+                }
+                else
+                {
+                    if (all_periods_ok)
+                    {
+                        std::cerr << "[Warning] This period has no Period ID. Will attempt fix when all periods are parsed." << std::endl;
+                        all_periods_ok = false;
+                    }
+                }
+
+                if (p.find("start") != p.end())
+                {
+                    p.at("start").get_to(start);
+                }
+                else
+                {
+                    std::cerr << "Period contained no start frame. Skipping." << std::endl;
+                    continue;
+                }
+
+                if (p.find("end") != p.end())
+                {
+                    p.at("end").get_to(end);
+                }
+                else
+                {
+                    std::cerr << "Period contains no end frame. Skipping." << std::endl;
+                    continue;
+                }
+
+                storage_metadata.PERIODS.emplace_back(id, start, end);
+            }
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Error] No periods in Metadata." << std::endl;
+            throw std::runtime_error("No Periods in Metadata.");
+        }
+        
+        return storage_metadata;
+    }
+
+    void load_from_file(const std::string & filepath, const bool verbose = false)
+    {
+        load_metadata_from_file(*this, filepath, verbose);
+    }
+
+    ///     @brief Translate the frameIds in all period objects by an amount. Used if frameIds are adjusted in the match to ensure that the frameId references in the period objects are correct. E.G if frameIds are translated to make the first frameId = 0.
+    ///     @brief All values for start/end frame are subtracted by parameter d_frame.
     ///     @param d_frame - value to subtract from frameIds
     void adjust_frames (std::int32_t d_frame)
     {

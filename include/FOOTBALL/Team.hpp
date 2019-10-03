@@ -19,6 +19,7 @@ class Team
     protected:
     std::uint32_t           FRAME_ID;
     bool                    BALL_OWNED      =   false;
+    char                    TEAM;               // 'H' - Home, 'A' - Away, 'O' - Official, 'U' - Unidentified, 'I' - Invalid Frame
     std::vector<Player>     PLAYERS_IN_TEAM;
 
     public:
@@ -29,7 +30,8 @@ class Team
         return PLAYERS_IN_TEAM.size();
     }
 
-    MSGPACK_DEFINE(FRAME_ID, BALL_OWNED, PLAYERS_IN_TEAM);
+    MSGPACK_DEFINE(FRAME_ID, TEAM, BALL_OWNED, PLAYERS_IN_TEAM);
+
 
     Team() { }
 
@@ -51,7 +53,7 @@ class Team
     /// @throws std::invalid_argument if team_char not in "HAOU"
     void setPlayerTeamChar(char team_char)
     {
-        std::string allowed_characters = "HAOU";
+        std::string allowed_characters = "HAOUI";
 
         // check if provided argument meets requirements
         if (allowed_characters.find(team_char) == std::string::npos)
@@ -143,6 +145,17 @@ class Team
     void                    add_player(const Player& _player)
     {
         PLAYERS_IN_TEAM.push_back(_player);
+    }
+
+    void                    set_teamChar(const char _team_char)
+    {
+        TEAM    = _team_char;
+        setPlayerTeamChar(_team_char);
+    }
+
+    char                    get_teamChar() const
+    {
+        return TEAM;
     }
 
 };
