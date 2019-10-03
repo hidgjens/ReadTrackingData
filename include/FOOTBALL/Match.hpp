@@ -275,17 +275,19 @@ struct Match
         }
     }
 
-    /// Loads a full match from a given path into this match object. If fps5 option is true then the '5fps/' subdir is used to load data.
+    /// @brief Loads a full match from a given path into this match object. If fps5 option is true then the '5fps/' subdir is used to load data.
     /// @param  _data_dir   - the path to the directory where data folders are stored.
     /// @param  _match_id   - the optaId of the desired match (used to locate the gamePack folder)
     /// @param  fps5 [true] - use the 5fps version of the match
-    void loadFromFile(std::string _data_dir, std::uint32_t _match_id, bool fps5 = true)
+    /// @returns bool success - whether the file was loaded or not
+
+    bool loadFromFile(std::string _data_dir, std::uint32_t _match_id, bool fps5 = true)
     {
-        getMatchFromFile(*this, _data_dir, _match_id, fps5);
+        return(getMatchFromFile(*this, _data_dir, _match_id, fps5));
     }
 
-    /// I'm leaving this exposed rather than having it as a protected member. It loads the msgpk file from @param path and stores the data in @param T& store. While T is a template it will only work with structures that have proper MsgPack definitions. 
-    /// If you wish to use this function to load a subfile, create an empty std::vector<Football::Team> (or std::vector<Football::Ball> for Ball subfile) and use that vector as the store for this method.
+    /// @brief I'm leaving this exposed rather than having it as a protected member. It loads the msgpk file from @param path and stores the data in @param T& store. While T is a template it will only work with structures that have proper MsgPack definitions. 
+    /// @brief If you wish to use this function to load a subfile, create an empty std::vector<Football::Team> (or std::vector<Football::Ball> for Ball subfile) and use that vector as the store for this method.
     /// @param path - path to subfile
     /// @param T& store - object to store data in
     /// @returns bool success - whether the file was loaded or not
@@ -366,6 +368,9 @@ struct Match
         
         if (!official_file)
             std::cout << "[INFO] No officials file" << std::endl;
+
+        // try loading metadata
+        storage_match.METADATA.load_from_file(base_file_path + ".METADATA.json", true);
         
 
         // if any of these failed an return false, load_ok will now read false

@@ -28,8 +28,8 @@ class Player: public PitchObject
     bool            BALL_OWNED      = false;
     // double          SPEED;      // metres per second
 
-    public:
-    MSGPACK_DEFINE(TEAM, PLAYER_ID, PLAYER_SHIRT_NUM, OBJECT_POS_X, OBJECT_POS_Y, BALL_OWNED);
+    public:    
+    MSGPACK_DEFINE(PLAYER_ID, PLAYER_SHIRT_NUM, OBJECT_POS_X, OBJECT_POS_Y, BALL_OWNED);
 
     static Player createRandomPlayer(const std::uint16_t sn = 1) 
     {
