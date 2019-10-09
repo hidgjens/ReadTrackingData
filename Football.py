@@ -126,9 +126,7 @@ class Player:
         print("({},{})".format(self.x_pos, self.y_pos))
 
     def get_json_list(self):
-        return [
-            self.team,
-            self.player_id,
+        return [self.player_id,
             self.shirt_num,
             self.x_pos,
             self.y_pos,
@@ -137,7 +135,6 @@ class Player:
 
     def get_json_dict(self):
         return {
-            'TEAM'      :   self.team,
             'PLAYERID'  :   self.player_id,
             'SHIRT'     :   self.shirt_num,
             'XPOS'      :   self.x_pos,
@@ -221,9 +218,9 @@ class Team:
             team_frames.append(
                 Team(
                     frame_id            = team_line[0],
-                    team_char           = team_line[1]
+                    team_char           = team_line[1],
                     ball_owned          = team_line[2],
-                    players_in_team     = [Player.get_player_from_msgpk_segment(p) for p in team_line[3]]
+                    players_in_team     = [Player.get_player_from_msgpk_segment(p, team_line[1]) for p in team_line[3]]
                 )
             )
 
