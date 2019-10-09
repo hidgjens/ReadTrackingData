@@ -1,3 +1,12 @@
+/*!
+ *  \file Player.hpp
+ *
+ *  \author Lewis Higgins
+ *  \date October 2019
+ *
+ *  \brief Defines a Class used to represent a player.
+ */
+
 #ifndef readtrackingdata_football_player_hpp_
 #define readtrackingdata_football_player_hpp_
 

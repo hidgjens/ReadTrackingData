@@ -9,8 +9,8 @@
 
     Example for loading and analysing a GamePack.
 
-    To build, please add "FOOTBALL/THIRDPARTY" to your include-dirs via the -I flag:
-        g++ cpp_example.cpp -I"FOOTBALL/THIRDPARTY"
+    To build, please add "include/" to your include-dirs via the -I flag:
+        g++ cpp_example.cpp -I"include"
 
     Might also want to consider building a 64-bit binary using the -m64 flag.
 

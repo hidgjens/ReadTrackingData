@@ -18,13 +18,12 @@ class Ball: public PitchObject
     protected:
     // inherited:   int     OBJECT_POS_X
     // inherited:   int     OBJECT_POS_Y
-    std::int16_t            OBJECT_POS_Z;
+    std::int16_t            OBJECT_POS_Z;               /*!< Cartesian Z coordinate in centimetres. */
     // double          SPEED;
-    bool                    ALIVE;
-    char                    OWNING_TEAM;
-    std::uint32_t           OWNING_PLAYER_ID;          // PLAYER_ID of player in possession
-    std::uint32_t           FRAME_ID;
-
+    bool                    ALIVE;                      /*!< Whether the ball is in play (alive). */
+    char                    OWNING_TEAM;                /*!< Character representation of which team owns the ball. */
+    std::uint32_t           OWNING_PLAYER_ID;           /*!< Player::PLAYER_ID of the Player in possession of the ball. */
+    std::uint32_t           FRAME_ID;                   /*!< The ID or index of the current Frame. */
 
     public:
     MSGPACK_DEFINE(FRAME_ID, OBJECT_POS_X, OBJECT_POS_Y, OBJECT_POS_Z, ALIVE, OWNING_TEAM, OWNING_PLAYER_ID);
@@ -89,6 +88,11 @@ class Ball: public PitchObject
         OBJECT_POS_Z = _pos[2];
     }
 
+    /*!
+     *  \brief  Check whether this Ball is marked alive.
+     * 
+     *  \return The value of #ALIVE.
+     */
     bool            is_alive() const
     {
         return ALIVE;

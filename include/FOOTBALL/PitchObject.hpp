@@ -1,3 +1,12 @@
+/*!
+ *  \file PitchObject.hpp
+ *
+ *  \author Lewis Higgins
+ *  \date October 2019
+ *
+ *  \brief Defines the Base Class used for representing anything with a position on the pitch.
+ */
+
 #ifndef readtrackingdata_football_pitchobject_hpp_
 #define readtrackingdata_football_pitchobject_hpp_
 

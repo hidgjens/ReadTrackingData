@@ -1,3 +1,14 @@
+/*!
+ *  \file Match.hpp
+ *
+ *  \author Lewis Higgins
+ *  \date $MONTHLONGNAME$ $YEAR$
+ *
+ *  Defines Match and Frame which are the main methods for accessing tracking data.
+ * 
+ *  Example here: \example cpp_example.cpp
+ */
+
 #ifndef trackingdatalib_football_match_hpp_
 #define trackingdatalib_football_match_hpp_
 
@@ -16,17 +27,33 @@
 namespace Football 
 {
 
-/// Temporary object to contain the ball and teams for a given instant of the match
+/*!
+ *  \class  Frame
+ *  \brief  An object to store Ball and Player objects for a given frame of a Match.
+ * 
+ *  \author Lewis Higgins
+ *  \date $MONTHLONGNAME$ $YEAR$
+ * 
+ */
 struct Frame
 {
-    std::uint32_t   FRAME_ID;
-    Ball            BALL;
-    Team            HOMETEAM;
-    Team            AWAYTEAM;
+    std::uint32_t   FRAME_ID;   /*!< The ID or index of this Frame. */
+    Ball            BALL;       /*!< The Ball object for this Frame. */
+    Team            HOMETEAM;   /*!< The Team object for the Home Team in this Frame */
+    Team            AWAYTEAM;   /*!< The Team object for the Away Team in this Frame */
 
     Frame()
     {}
 
+    /*!
+     * \brief Parameterised constructor for convenience.
+     *
+     * \param _frame_id Frame ID or index to assign to FRAME_ID.
+     * \param _b Ball to be stored in #BALL.
+     * \param _ht Team object containing Home players to be stored in #HOMETEAM.
+     * \param _at Team object containing Away players to be stored in #AWAYTEAM.
+     * \note    Stores default-initialised Ball and Team objects if none provided.
+     */
     Frame(std::uint32_t _frame_id, const Ball & _b = Ball(), const Team & _ht = Team(), const Team & _at = Team())
     :   FRAME_ID(_frame_id)
     ,   BALL(_b)
@@ -34,6 +61,10 @@ struct Frame
     ,   AWAYTEAM(_at)
     {}
 
+    /*!
+     * \brief Check whether Ball is marked alive in this Frame.
+     * \return The value of Ball::is_alive()
+     */
     bool    isAlive() const 
     {
         return BALL.is_alive();
@@ -251,7 +282,11 @@ struct Match
         }
     }
 
-    /// Translate all frameIDs such that the first frame in the dataset has frameID = 0. This will automatically adjust the start/end values in METADATA.PERIODS
+    /*!
+     *  \brief Translates the value of Frame::FRAME_ID for each Frame in this Match such that the first Frame has Frame::FRAME_ID = 0.
+     * 
+     *  Takes the value of Frame::FRAME_ID in the
+     */
     void resetFrameIDs()
     {
         if (number_of_frames() >= 1)
@@ -286,11 +321,11 @@ struct Match
         return(getMatchFromFile(*this, _data_dir, _match_id, fps5));
     }
 
-    /// @brief I'm leaving this exposed rather than having it as a protected member. It loads the msgpk file from @param path and stores the data in @param T& store. While T is a template it will only work with structures that have proper MsgPack definitions. 
-    /// @brief If you wish to use this function to load a subfile, create an empty std::vector<Football::Team> (or std::vector<Football::Ball> for Ball subfile) and use that vector as the store for this method.
-    /// @param path - path to subfile
-    /// @param T& store - object to store data in
-    /// @returns bool success - whether the file was loaded or not
+    /// \brief I'm leaving this exposed rather than having it as a protected member. It loads the msgpk file from @param path and stores the data in @param T& store. While T is a template it will only work with structures that have proper MsgPack definitions. 
+    ///     If you wish to use this function to load a subfile, create an empty std::vector<Football::Team> (or std::vector<Football::Ball> for Ball subfile) and use that vector as the store for this method.
+    /// \param path - path to subfile
+    /// \param T& store - object to store data in
+    /// \returns bool success - whether the file was loaded or not
     template<typename T>
     static bool load_subfile(std::string path, T& store, bool required = true)
     {

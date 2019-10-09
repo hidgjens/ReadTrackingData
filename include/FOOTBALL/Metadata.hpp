@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <cstdint>
+#include <iostream>
 // #include <float.h>
 #include <string>
 #include <fstream>
