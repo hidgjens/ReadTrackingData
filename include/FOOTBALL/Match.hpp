@@ -202,9 +202,29 @@ struct Match
             if (BALL_FRAMES[i].ALIVE)
             {
                 TEMP_BALL.push_back(BALL_FRAMES[i]);
-                TEMP_HOME.push_back(HOMETEAM_FRAMES[i]);
-                TEMP_AWAY.push_back(AWAYTEAM_FRAMES[i]);
-                TEMP_OFFI.push_back(OFFICIALS_FRAMES[i]);
+
+                //  take care not to cause a segfault
+
+                if (i < HOMETEAM_FRAMES.size())
+                    TEMP_HOME.push_back(HOMETEAM_FRAMES[i]);
+                else
+                {
+                    /* runtime error really, these should exist */
+                    std::cerr << "Warning: Number of ball frames seems to exceed number of home frames." << std::endl;
+                }
+
+                if (i < AWAYTEAM_FRAMES.size())
+                    TEMP_AWAY.push_back(AWAYTEAM_FRAMES[i]);
+                else
+                {
+                    std::cerr << "Warning: Number of ball frames seems to exceed number of away frames." << std::endl;
+                }
+
+                //  genuine risk of there being no official frames
+                if (i < OFFICIALS_FRAMES.size())
+                {
+                    TEMP_OFFI.push_back(OFFICIALS_FRAMES[i]);
+                }
             }
         }
 

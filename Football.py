@@ -218,9 +218,9 @@ class Team:
             team_frames.append(
                 Team(
                     frame_id            = team_line[0],
-                    team_char           = team_line[1],
+                    team_char           = chr(team_line[1]),
                     ball_owned          = team_line[2],
-                    players_in_team     = [Player.get_player_from_msgpk_segment(p, team_line[1]) for p in team_line[3]]
+                    players_in_team     = [Player.get_player_from_msgpk_segment(p, chr(team_line[1])) for p in team_line[3]]
                 )
             )
 
@@ -247,22 +247,23 @@ class Period:
     @staticmethod
     def getPeriodFromJSONObj(json_obj):
         # get period ID
-        keys = list(json_obj.keys())
+        period_id   = None
+        start_fr    = None
+        end_fr      = None
 
-        period_id = None
+        if "id" in json_obj.keys():
+            period_id   =   int(json_obj["id"])
 
-        if len(keys) == 1:
-            period_id = int(keys[0])
-        else:
-            # shouldn't be necessary but lets find the key
-            for key in keys:
-                if key in "012345": # should only be a number between 1-5
-                    period_id = int(key)
+        if "start" in json_obj.keys():
+            start_fr    =   int(json_obj["start"])
+
+        if "end" in json_obj.keys():
+            end_fr      =   int(json_obj["end"])
 
         return Period(
             period_id   =   period_id,
-            start_frame =   json_obj[str(period_id)][0],
-            end_frame   =   json_obj[str(period_id)][1]
+            start_frame =   start_fr,
+            end_frame   =   end_fr
         )
 
 class Metadata:
@@ -301,7 +302,7 @@ class Metadata:
         with open(file_path, 'r') as mdata_file:
             mdata = json.load(mdata_file)
 
-        mdata = mdata[0] # quick fix, remove this line post fix
+        # mdata = mdata[0] # quick fix, remove this line post fix
 
         return Metadata(
             match_id            =   mdata['MATCHID'],
@@ -367,6 +368,17 @@ class Match:
                     return len(self.home_frames)
                 else:
                     return len(self.away_frames)
+                
+    def remove_dead_frames(self):
+        for i, frame in enumerate(zip(self.ball_frames, self.home_frames, self.away_frames)):
+            ball, home, away    =   frame
+            # print(ball.alive)
+            if not (ball.alive):
+                # print("Killing frame %i" % i)
+                self.ball_frames.pop(i)
+                self.home_frames.pop(i)
+                self.away_frames.pop(i)
+
 
     @staticmethod
     def getMatchFromFile(tracking_data_dir: str, match_id: int, fps5: bool = True):
