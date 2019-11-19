@@ -370,14 +370,22 @@ class Match:
                     return len(self.away_frames)
                 
     def remove_dead_frames(self):
+        new_ball    =   []
+        new_home    =   []
+        new_away    =   []
         for i, frame in enumerate(zip(self.ball_frames, self.home_frames, self.away_frames)):
-            ball, home, away    =   frame
+            ball, h, a      =   frame
             # print(ball.alive)
-            if not (ball.alive):
+            if (ball.alive):
                 # print("Killing frame %i" % i)
-                self.ball_frames.pop(i)
-                self.home_frames.pop(i)
-                self.away_frames.pop(i)
+                new_ball.append(self.ball_frames[i])
+                new_home.append(self.home_frames[i])
+                new_away.append(self.away_frames[i])
+
+        self.ball_frames    =   new_ball
+        self.home_frames    =   new_home
+        self.away_frames    =   new_away
+        
 
 
     @staticmethod
@@ -386,6 +394,8 @@ class Match:
         subdir = ""     
         if fps5:
             subdir = "5fps/"
+        else:
+            subdir = "25fps/"
 
         # check that path is formatted correctly  
         if tracking_data_dir[-1] != "/":
@@ -509,25 +519,29 @@ def make_folder(directory: str):
     if not exists(directory):
         makedirs(directory)
 
-def convert_match_msgpk_to_efficient_json(tracking_data_folder: str, match_id: int, output_path: str = 'JSON/', fps5 : bool = False ):
-    '''
-    Converts a MessagePack Gamepack to a JSON Gamepack. Returns a list of filepaths.
+def convert_match_msgpk_to_efficient_json(tracking_data_folder: str, match_id: int, fps5 : bool = False):
+    pass
 
-    @param      tracking_data_folder        - path to find gamepacks
-    @param      match_id                    - integer optaMatchId of match
-    @param      output_path     ['JSON/']   - path to create JSON gamepack
-    @param      fps5            [false]     - convert the data in the 5fps subfolder
-
-    @returns    List of file paths:
-                    [0]                     - path to ball json file
-                    [1]                     - path to hometeam json file
-                    [2]                     - path to awayteam json file
-                    [3]                     - path to metadata json file
-
-    Searches tracking_data_folder for a folder matching match_id. Then searches this folder for '[match_id].BALL.msgpack', '[match_id].HOME.msgpack', '[match_id].AWAY.msgpack', and '[match_id].METADATA.msgpack'. If fps5 is True then these files are located in the '5fps/' subdirectory instead. The file is unpacked with msgpack.unpack() and converted to a JSON-like, Python-native object - this is then written to a JSON file using json.dump().
-    An efficient JSON does not include keys. The structure of the JSON must be known by the user.
-    Example:    [0, 47, -17, 32, false, 72, 2464660512]
-    '''
+##
+#    Converts a MessagePack Gamepack to a JSON Gamepack. Returns a list of filepaths.
+#
+#    @param      tracking_data_folder        - path to find gamepacks
+#    @param      match_id                    - integer optaMatchId of match
+#    @param      output_path     ['JSON/']   - path to create JSON gamepack
+#    @param      fps5            [false]     - convert the data in the 5fps subfolder
+#
+#    @returns    List of file paths:
+#                    [0]                     - path to ball json file
+#                    [1]                     - path to hometeam json file
+#                    [2]                     - path to awayteam json file
+#                    [3]                     - path to metadata json file
+#
+#    Searches tracking_data_folder for a folder matching match_id. Then searches this folder for '[match_id].BALL.msgpack', '[match_id].HOME.msgpack', '[match_id].AWAY.msgpack', and '[match_id].METADATA.msgpack'. If fps5 is True then these files are located in the '5fps/' subdirectory instead. The file is unpacked with msgpack.unpack() and converted to a JSON-like, Python-native object - this is then written to a JSON file using json.dump().
+#    An efficient JSON does not include keys. The structure of the JSON must be known by the user.
+#    Example:    [0, 47, -17, 32, false, 72, 2464660512]
+##
+def convert_match_msgpk_to_efficient_json_file(tracking_data_folder: str, match_id: int, output_path: str = 'JSON/', fps5 : bool = False ):
+    
 
     if tracking_data_folder[-1] != "/":
         tracking_data_folder += "/"
@@ -538,6 +552,8 @@ def convert_match_msgpk_to_efficient_json(tracking_data_folder: str, match_id: i
     subdir = "" # keep blank if not 5fps
     if fps5:
         subdir = "5fps/"
+    else:
+        subdir = "25fps/"
 
     make_folder(output_path + str(match_id) + "/" + subdir)
 
@@ -603,6 +619,8 @@ def convert_match_msgpk_to_readable_json(tracking_data_folder: str, match_id: in
     subdir = "" # keep blank if not 5fps
     if fps5:
         subdir = "5fps/"
+    else:
+        subdir = "25fps/"
 
     make_folder(output_path + str(match_id) + "/" + subdir)
 
