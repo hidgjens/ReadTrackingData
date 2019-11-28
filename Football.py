@@ -7,6 +7,7 @@ import json
 
 import msgpack
 
+
 # incase TQDM isn't installed
 try:
     from tqdm import tqdm
