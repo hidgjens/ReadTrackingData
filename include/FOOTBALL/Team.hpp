@@ -7,7 +7,8 @@
 
 #include <msgpack.hpp>
 
-#include "Player.hpp"
+#include "FOOTBALL/Player.hpp"
+#include "FOOTBALL/Roster/TeamRoster.hpp"
 
 namespace Football 
 {
@@ -21,6 +22,7 @@ class Team
     bool                    BALL_OWNED      =   false;
     char                    TEAM;               // 'H' - Home, 'A' - Away, 'O' - Official, 'U' - Unidentified, 'I' - Invalid Frame
     std::vector<Player>     PLAYERS_IN_TEAM;
+    Roster::TeamRoster      TEAM_ROSTER;
 
     public:
 
@@ -101,6 +103,10 @@ class Team
     {
         return  PLAYERS_IN_TEAM;
     }
+    const std::vector<Player> & get_playersInTeam() const 
+    {
+        return PLAYERS_IN_TEAM;
+    }
     /// Set the vector of players for this team.
     void                    set_playersInTeam(const std::vector<Player>& _players_in_team)
     {
@@ -156,6 +162,33 @@ class Team
     char                    get_teamChar() const
     {
         return TEAM;
+    }
+
+    const Roster::TeamRoster &     get_team_roster()   const
+    {
+        return TEAM_ROSTER;
+    }
+
+    void        assigned_player_summaries_to_players()
+    {
+        for (auto & plyr : PLAYERS_IN_TEAM)
+        {
+            plyr.PLAYER_SUMMARY =   TEAM_ROSTER.find_player_summary(plyr.PLAYER_ID, plyr.PLAYER_SHIRT_NUM);
+        }
+    }
+
+    void        set_team_roster(const Roster::TeamRoster & _team_roster)
+    {
+        TEAM_ROSTER =   _team_roster;
+        assigned_player_summaries_to_players();
+    }
+
+    void        link_players_to_summary()
+    {
+        for (auto & plyr : PLAYERS_IN_TEAM)
+        {
+            plyr.PLAYER_SUMMARY = TEAM_ROSTER.find_player_summary(plyr.PLAYER_ID, plyr.PLAYER_SHIRT_NUM);
+        }
     }
 
 };

@@ -15,7 +15,8 @@
 
 #include <msgpack.hpp>
 
-#include "PitchObject.hpp"
+#include "FOOTBALL/PitchObject.hpp"
+#include "FOOTBALL/Roster/PlayerRoster.hpp"
 
 namespace Football 
 {
@@ -36,6 +37,8 @@ class Player: public PitchObject
     std::uint32_t   PLAYER_ID;
     bool            BALL_OWNED      = false;
     // double          SPEED;      // metres per second
+
+    const Roster::PlayerSummary *   PLAYER_SUMMARY;
 
     public:    
     MSGPACK_DEFINE(PLAYER_ID, PLAYER_SHIRT_NUM, OBJECT_POS_X, OBJECT_POS_Y, BALL_OWNED);
@@ -135,6 +138,241 @@ class Player: public PitchObject
     virtual void print(std::ostream& os) const 
     {
         os << "Player " << PLAYER_SHIRT_NUM << ": (" << OBJECT_POS_X << "," << OBJECT_POS_Y << ")";
+    }
+
+    void            set_player_summary(const Roster::PlayerSummary * _player_sum)
+    {
+        PLAYER_SUMMARY  =   _player_sum;
+    }
+
+    const Roster::PlayerSummary *   get_player_summary()    const
+    {
+        return PLAYER_SUMMARY;
+    }
+
+    /*!
+     *  \brief  Check if player starts in a given position (\a pos)
+     *  \param  pos     The position to compare with this player's position
+     * 
+     *  \returns        Boolean, whether the player's position matches the one given
+     */
+    bool            starts_in_position(Roster::PlayerPositions  pos)    const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->starts_in_position(pos);
+        }
+    }
+
+    /*!
+    *  \brief  Check if player is subbed into a given position (\a pos)
+    *  \param  pos     The position to compare with this player's position
+    * 
+    *  \returns        Boolean, whether the player's position matches the one given
+    */
+    bool            subbed_into_position(Roster::PlayerPositions    pos)    const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->subbed_into_position(pos);
+        }
+    }
+
+    /*!
+    *  \brief  Check if player starting position information is given
+    * 
+    *  \returns        Boolean, whether the player's position is not equal to non_applicable
+    */
+    bool            starting_information_is_given()     const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->starting_information_is_given();
+        }
+    }
+
+    /*!
+    *  \brief  Check if player starting position information is given
+    * 
+    *  \returns        Boolean, whether the player's position is not equal to non_applicable
+    */
+    bool            subposition_information_is_given()     const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->subposition_information_is_given();
+        }
+    }
+
+    bool            is_goalkeeper() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_goalkeeper();
+        }
+    }
+    bool            is_not_goalkeeper() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_goalkeeper();
+        }
+    }
+
+    bool            is_defender() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_defender();
+        }
+    }
+    bool            is_not_defender() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_defender();
+        }
+    }
+
+    bool            is_midfielder() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_midfielder();
+        }
+    }
+    bool            is_not_midfielder() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_midfielder();
+        }
+    }
+
+    bool            is_striker() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_striker();
+        }
+    }
+    bool            is_not_striker() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_striker();
+        }   
+    }
+
+    bool            is_forward() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_forward();
+        }   
+    }
+    bool            is_not_forward() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_forward();
+        }   
+    }
+
+    bool            is_substitute() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_substitute();
+        }   
+    }
+    bool            is_not_substitute() const
+    {
+        if (PLAYER_SUMMARY == nullptr)
+        {
+            std::cerr << "Player Summary not given." << std::endl;
+            return false;
+        }
+        else
+        {
+            return PLAYER_SUMMARY->is_not_substitute();
+        }   
+
     }
 };
 

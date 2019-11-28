@@ -12,6 +12,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include "FOOTBALL/Roster/TeamRoster.hpp"
 
 namespace Football
 {
@@ -24,8 +25,10 @@ class Period
 
     protected:
     std::uint8_t            PERIOD_ID;
-    std::uint32_t           START_FRAME;
-    std::uint32_t           END_FRAME;
+    std::uint32_t           START_FRAME,
+                            END_FRAME;
+
+    
 
     public:
     Period(){}
@@ -97,12 +100,15 @@ class Metadata
     std::float_t                    FPS;
     std::array<std::float_t, 2>     PITCH_DIMS; // say yes to STL
     //float               TRACKING_DIMS[2];
-    std::vector<Period> PERIODS; 
+    std::vector<Period>             PERIODS; 
 
     // extra tags
-    bool                OPTA_F7;
-    bool                OPTA_F24;
+    bool                OPTA_F7,
+                        OPTA_F24;
     std::string         TRACKING_PROVIDER; 
+
+    Roster::TeamRoster  HOMETEAM_ROSTER,
+                        AWAYTEAM_ROSTER;
 
     public:
 
@@ -265,6 +271,34 @@ class Metadata
             if (verbose)
                 std::cerr << "[Error] No periods in Metadata." << std::endl;
             throw std::runtime_error("No Periods in Metadata.");
+        }
+
+        if (storage_json.find("homeTeam") != storage_json.end())
+        {
+            const auto & team_json_obj  =   storage_json.at("homeTeam");
+            storage_metadata.HOMETEAM_ROSTER    =   Roster::TeamRoster(team_json_obj);
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Error] No homeTeam in Metadata." << std::endl;
+            std::clog << "[Error] No homeTeam in Metadata." << std::endl;
+
+            throw std::runtime_error("No homeTeam in Metadata.");
+        }
+
+        if (storage_json.find("awayTeam") != storage_json.end())
+        {
+            const auto & team_json_obj  =   storage_json.at("awayTeam");
+            storage_metadata.AWAYTEAM_ROSTER    =   Roster::TeamRoster(team_json_obj);
+        }
+        else
+        {
+            if (verbose)
+                std::cerr << "[Error] No awayTeam in Metadata." << std::endl;
+            std::clog << "[Error] No awayTeam in Metadata." << std::endl;
+
+            throw std::runtime_error("No awayTeam in Metadata.");
         }
         
         return storage_metadata;

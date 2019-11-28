@@ -16,6 +16,7 @@
 #include <memory>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <cmath>
 
 #include <msgpack.hpp>
@@ -183,6 +184,23 @@ struct Match
         {
             p.START_FRAME = ceil(((double) p.START_FRAME) / 5);
             p.END_FRAME = floor(((double) p.END_FRAME) / 5);
+        }
+    }
+
+    void link_players_to_summary()
+    {
+        // home team
+        for (auto & hm_fr : HOMETEAM_FRAMES)
+        {
+            hm_fr.TEAM_ROSTER   =   METADATA.HOMETEAM_ROSTER;
+            hm_fr.link_players_to_summary();
+        }
+
+        // away team
+        for (auto & aw_fr : AWAYTEAM_FRAMES)
+        {
+            aw_fr.TEAM_ROSTER   =   METADATA.AWAYTEAM_ROSTER;
+            aw_fr.link_players_to_summary();
         }
     }
 
@@ -429,9 +447,12 @@ struct Match
         
 
         // if any of these failed an return false, load_ok will now read false
-
+        storage_match.link_players_to_summary();
+        
         return load_ok;
     }
+
+    
 
 };
 
