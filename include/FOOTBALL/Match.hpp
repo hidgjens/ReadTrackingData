@@ -28,6 +28,13 @@
 namespace Football 
 {
 
+enum    MatchFileVersion
+{
+    FPS25,          /*<!    Use the "25fps/" sub dir when loading a match       */
+    FPS5,           /*<!    Use the "5fps/" sub dir when loading a match        */
+    FPS5_ALIVE      /*<!    Use the "5fps_alive/" sub dir when loading a match  */
+};
+
 /*!
  *  \class  Frame
  *  \brief  An object to store Ball and Player objects for a given frame of a Match.
@@ -351,12 +358,12 @@ struct Match
     /// @brief Loads a full match from a given path into this match object. If fps5 option is true then the '5fps/' subdir is used to load data.
     /// @param  _data_dir   - the path to the directory where data folders are stored.
     /// @param  _match_id   - the optaId of the desired match (used to locate the gamePack folder)
-    /// @param  fps5 [true] - use the 5fps version of the match
+    /// @param  _vers       - which version of the match file to use. Default is FPS5_ALIVE
     /// @returns bool success - whether the file was loaded or not
 
-    bool loadFromFile(std::string _data_dir, std::uint32_t _match_id, bool fps5 = true)
+    bool loadFromFile(std::string _data_dir, std::uint32_t _match_id, MatchFileVersion _vers = FPS5_ALIVE)
     {
-        return(getMatchFromFile(*this, _data_dir, _match_id, fps5));
+        return(getMatchFromFile(*this, _data_dir, _match_id, _vers));
     }
 
     /// \brief I'm leaving this exposed rather than having it as a protected member. It loads the msgpk file from @param path and stores the data in @param T& store. While T is a template it will only work with structures that have proper MsgPack definitions. 
@@ -401,9 +408,9 @@ struct Match
     /// @param  storage_match - Match object which is wiped then used to store loaded data
     /// @param  _data_dir   - the path to the directory where data folders are stored.
     /// @param  _match_id   - the optaId of the desired match (used to locate the gamePack folder)
-    /// @param  fps5 [true] - use the 5fps version of the match
+    /// @param  _vers       - which version of the match file to use. Default is FPS5_ALIVE
     /// @returns bool success - whether the file was loaded or not
-    static bool getMatchFromFile(Match& storage_match, std::string _data_dir, std::uint32_t _match_id, bool fps5 = true)
+    static bool getMatchFromFile(Match& storage_match, std::string _data_dir, std::uint32_t _match_id, MatchFileVersion _vers = FPS5_ALIVE)
     /*
         Loads match from base_file_path and stores in match container provided.
 
@@ -419,9 +426,23 @@ struct Match
 
         // sub_dir used to locate 5fps files if needed
         std::string sub_dir = "";
-        if (fps5)
+        switch (_vers)
         {
-            sub_dir = "5fps/";
+        case FPS25:
+            sub_dir     =   "25fps/";
+            break;
+
+        case FPS5:
+            sub_dir     =   "5fps/";
+            break;
+
+        case FPS5_ALIVE:
+            sub_dir     =   "5fps_alive";
+            break;
+
+        default:
+            std::cerr << "Given enum " << _vers << " for MatchFileVersion, but I don't know what to do with it" << std::endl;
+            break;
         }
 
         std::string base_file_path = _data_dir + std::to_string(_match_id) + "/" + sub_dir + std::to_string(_match_id);
