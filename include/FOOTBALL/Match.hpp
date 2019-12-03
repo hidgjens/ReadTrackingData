@@ -437,7 +437,7 @@ struct Match
             break;
 
         case FPS5_ALIVE:
-            sub_dir     =   "5fps_alive";
+            sub_dir     =   "5fps_alive/";
             break;
 
         default:
