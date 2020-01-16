@@ -469,8 +469,206 @@ struct Match
 
         // if any of these failed an return false, load_ok will now read false
         storage_match.link_players_to_summary();
+
+        storage_match.calculate_player_velocities();
         
         return load_ok;
+    }
+
+    void make_home_team_play_left_first()
+    {
+        //  the sum of all the home players' x coordinates should be negative (on the left side). If not we must mirror the whole match.
+
+        //  get first live frame from first period.
+        std::uint32_t   first_frame_idx;
+
+        // if (METADATA.PERIODS.size() > 0)
+        // {
+        //     auto& first_period  =   METADATA.PERIODS[0];
+
+        //     first_frame_id      =   first_period.START_FRAME;
+        // }
+        // else
+        // {
+        // could use metadata, but we're bruteforcing this for safety
+
+        for (uint i = 0; i < number_of_frames() ; i++)
+        {
+            if (BALL_FRAMES[i].ALIVE)
+            {
+                first_frame_idx     =   i;
+                break;
+            }
+        }
+
+        std::int32_t   total_x =   0;
+
+        for (auto & player  :   HOMETEAM_FRAMES[first_frame_idx].PLAYERS_IN_TEAM)
+        {
+            total_x     +=  player.get_posX();
+        }
+
+        if (total_x     >   0)
+        {
+            std::cout << "I have detected that the Home team plays on the right side during the first period. Mirroring whole match." << std::endl;
+            std::cerr << "I have detected that the Home team plays on the right side during the first period. Mirroring whole match." << std::endl;
+
+            // home team on the wrong side, must invert every frame.
+
+            // ball
+            for (auto & ball_frame : BALL_FRAMES)
+            {
+                ball_frame.OBJECT_POS_X *=  -1;
+                ball_frame.OBJECT_POS_Y *=  -1;
+            }
+
+            // home
+            for (auto & home_frame: HOMETEAM_FRAMES)
+            {
+                for (auto & home_player: home_frame.PLAYERS_IN_TEAM)
+                {
+                    home_player.OBJECT_POS_X    *=  -1;
+                    home_player.OBJECT_POS_Y    *=  -1;
+                }
+            }
+
+            // away
+            for (auto & away_frame: AWAYTEAM_FRAMES)
+            {
+                for (auto & away_player: away_frame.PLAYERS_IN_TEAM)
+                {
+                    away_player.OBJECT_POS_X    *=  -1;
+                    away_player.OBJECT_POS_Y    *=  -1;
+                }
+            }
+        }
+
+        
+    }
+
+    void calculate_player_velocities()
+    {
+        //  first frame we can leave, since we cannot determine their velocity so we set it to zero, and players initialise VELOCITY to be [0,0] anyway
+
+        Frame       previous_frame;
+        Player *    previous_player_pointer =   nullptr;
+
+        std::int16_t    dx, dy, vx, vy;
+
+        int     difference_in_ID;
+
+        //  start from second frame
+        for (uint fr_idx = 1 ; fr_idx < number_of_frames() ; fr_idx ++)
+        {
+            //  find previous frame
+            previous_frame  =   get_frame(fr_idx - 1);
+
+            //  see if there was a break in play
+
+            //  if the difference in the frames' IDs is 1, these are consecutive frames
+            difference_in_ID    =   BALL_FRAMES[fr_idx].FRAME_ID - previous_frame.FRAME_ID;
+
+            if (difference_in_ID == 1)
+            {
+                //  these are consecutive frames
+
+                //  must compare current positions to previous ones
+
+                //  loop through home players
+                for (auto & player: HOMETEAM_FRAMES[fr_idx].PLAYERS_IN_TEAM)
+                {
+                    //  check if player is in previous frame
+                    previous_player_pointer =   nullptr;
+
+                    if (player.PLAYER_ID   ==  0)
+                    {
+                        //  player ID information not used, we will have to guess by shirt number
+                        previous_player_pointer =   HOMETEAM_FRAMES[fr_idx - 1].find_player_with_shirtnumber(player.PLAYER_SHIRT_NUM);
+                    }
+                    else
+                    {
+                        //  player ID information is provided
+                        previous_player_pointer =   HOMETEAM_FRAMES[fr_idx - 1].find_player_with_id(player.PLAYER_ID);
+
+                    }
+
+                    //  check if a player was found
+                    if (previous_player_pointer == nullptr)
+                    {
+                        //  no player found, leave velocity at zero and move on
+                        continue;
+                    }
+                    else
+                    {
+                        //  player found, calculate dx, dy
+                        dx  =   player.get_posX() - previous_player_pointer->get_posX();
+                        dy  =   player.get_posY() - previous_player_pointer->get_posY();
+
+                        //  dt  =   1/fps ; dx/dt = dx * 1/dt = dx * fps
+                        vx  =   dx * (std::int16_t) METADATA.FPS;
+                        vy  =   dy * (std::int16_t) METADATA.FPS;
+                        
+                        player.VELOCITY[0] =   vx;
+                        player.VELOCITY[1] =   vy;
+
+                    }
+
+                }
+
+                //  loop through away players
+                for (auto & player: AWAYTEAM_FRAMES[fr_idx].PLAYERS_IN_TEAM)
+                {
+                    //  check if player is in previous frame
+                    previous_player_pointer =   nullptr;
+
+                    if (player.PLAYER_ID   ==  0)
+                    {
+                        //  player ID information not used, we will have to guess by shirt number
+                        previous_player_pointer =   AWAYTEAM_FRAMES[fr_idx - 1].find_player_with_shirtnumber(player.PLAYER_SHIRT_NUM);
+                    }
+                    else
+                    {
+                        //  player ID information is provided
+                        previous_player_pointer =   AWAYTEAM_FRAMES[fr_idx - 1].find_player_with_id(player.PLAYER_ID);
+
+                    }
+
+                    //  check if a player was found
+                    if (previous_player_pointer == nullptr)
+                    {
+                        //  no player found, leave velocity at zero and move on
+                        continue;
+                    }
+                    else
+                    {
+                        //  player found, calculate dx, dy
+                        dx  =   player.get_posX() - previous_player_pointer->get_posX();
+                        dy  =   player.get_posY() - previous_player_pointer->get_posY();
+
+                        //  dt  =   1/fps ; dx/dt = dx * 1/dt = dx * fps
+                        vx  =   dx * static_cast<std::int16_t>(METADATA.FPS);
+                        vy  =   dy * static_cast<std::int16_t>(METADATA.FPS);
+                        
+                        player.VELOCITY[0] =   vx;
+                        player.VELOCITY[1] =   vy;
+
+                    }
+
+                }
+            }
+            else
+            {
+                //  these are not consecutive frames
+
+                //  we cannot accurately predict velocity of players here, we just have to assume they start from rest.
+
+                //  next frame
+
+                continue;
+            }
+
+
+        }
     }
 
     

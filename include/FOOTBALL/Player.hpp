@@ -37,6 +37,7 @@ class Player: public PitchObject
     std::uint32_t   PLAYER_ID;
     bool            BALL_OWNED      = false;
     // double          SPEED;      // metres per second
+    std::array<std::int16_t, 2>     VELOCITY;   //  centimetres per second
 
     const Roster::PlayerSummary *   PLAYER_SUMMARY;
 
@@ -56,11 +57,15 @@ class Player: public PitchObject
         return(rtrn_player);
     }
     
-    Player(std::int16_t x = 0.0, std::int16_t y = 0.0, std::uint8_t sn = 1) : PLAYER_SHIRT_NUM(sn) 
+    Player(std::int16_t x = 0.0, std::int16_t y = 0.0, std::uint8_t sn = 1) 
+    :   PLAYER_SHIRT_NUM(sn)
+    ,   VELOCITY({0, 0}) 
     {
         OBJECT_POS_X = x ; OBJECT_POS_Y = y;
     }
-    Player(std::pair<std::int16_t, std::int16_t> p, std::uint8_t sn = 1) : PLAYER_SHIRT_NUM(sn)
+    Player(std::pair<std::int16_t, std::int16_t> p, std::uint8_t sn = 1) 
+    :   PLAYER_SHIRT_NUM(sn)
+    ,   VELOCITY({0, 0})
     {
         OBJECT_POS_X = p.first ; OBJECT_POS_Y = p.second;
     }
@@ -374,11 +379,27 @@ class Player: public PitchObject
         }   
 
     }
+    /*!
+     *  @brief  Get the player's velocity. This is calculated during the loading of a match (and can be skipped, which if it was means this function will just return [0,0]).
+     * 
+     *  Units of centimetres per second.
+     */
+    std::array<std::int16_t, 2>     get_player_velocity () const
+    {
+        return VELOCITY;
+    }
+    std::int16_t    get_velocity_x_component () const
+    {
+        return VELOCITY[0];
+    }
+    std::int16_t    get_velocity_y_component () const
+    {
+        return VELOCITY[1];
+    }
 };
 
 inline bool operator==(const Player& lhs, const Player& rhs)
 {
-
     return (
         lhs.OBJECT_POS_X        == rhs.OBJECT_POS_X
         &&
@@ -397,7 +418,6 @@ inline bool operator!=(const Player& lhs, const Player& rhs)
 {
     return !(lhs == rhs);
 }
-
 
 } /* namespace Football */
 

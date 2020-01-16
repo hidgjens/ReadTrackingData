@@ -191,6 +191,42 @@ class Team
         }
     }
 
+    Player *    find_player_with_id(std::uint32_t   _pid)
+    {
+
+        //  loop through players
+        for (auto & plyr : PLAYERS_IN_TEAM)
+        {
+            //  check if ids match
+            if (plyr.PLAYER_ID  ==  _pid)
+            {
+                //  return address of player
+                return &plyr;
+            }
+        }
+
+        //  if control reaches this point then no player was found matching the ID given, return null
+        return nullptr;
+    }
+
+    Player *    find_player_with_shirtnumber(std::uint8_t   _sh_num)
+    {
+
+        //  loop through players
+        for (auto & plyr : PLAYERS_IN_TEAM)
+        {
+            //  check if ids match
+            if (plyr.PLAYER_SHIRT_NUM  ==  _sh_num)
+            {
+                //  return address of player
+                return &plyr;
+            }
+        }
+
+        //  if control reaches this point then no player was found matching the ID given, return null
+        return nullptr;
+    }
+
 };
 
 std::ostream& operator<<(std::ostream& os, const Team& c);
